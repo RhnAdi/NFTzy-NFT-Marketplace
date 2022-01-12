@@ -1,0 +1,4 @@
+export const SET_ACCOUNT = "SET_ACCOUNTS";
+export const SET_WEB3 = "SET_WEB3";
+export const SET_MARKETCONTRACT = "SET_MARKET_CONTRACT";
+export const SET_TOKENCONTRACT = "SET_TOKEN_CONTRACT";

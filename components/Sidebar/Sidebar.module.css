@@ -1,0 +1,9 @@
+/* .menu_active::after {
+  content: "";
+  height: 100%;
+  width: 3px;
+  background-color: #c32bad;
+  position: absolute;
+  left: 0;
+  border-radius: 12px;
+} */
