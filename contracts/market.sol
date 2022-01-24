@@ -10,7 +10,7 @@ contract market is ReentrancyGuard {
     Counters.Counter private _itemIds;
     Counters.Counter private _itemSold;
     address payable owner;
-    uint256 listingPrice = 0.25 ether;
+    uint256 constant listingPrice = 0.0025 ether;
 
     constructor() {
         owner = payable(msg.sender);
@@ -24,6 +24,7 @@ contract market is ReentrancyGuard {
         address payable owner;
         uint256 price;
         bool sold;
+        uint256 created;
     }
 
     mapping(uint256 => MarketItem) private idToMarketItem;
@@ -35,10 +36,18 @@ contract market is ReentrancyGuard {
         address seller,
         address owner,
         uint256 price,
-        bool sold
+        bool sold,
+        uint256 created
     );
 
-    function getListingPrice() public view returns (uint256) {
+    event ItemTransfered(
+        uint256 tokenId,
+        address from,
+        address to,
+        uint256 timestamp
+    );
+
+    function getListingPrice() public pure returns (uint256) {
         return listingPrice;
     }
 
@@ -61,7 +70,8 @@ contract market is ReentrancyGuard {
             payable(msg.sender),
             payable(address(0)),
             price,
-            false
+            false,
+            block.timestamp
         );
         IERC721(tokenAddress).transferFrom(
             payable(msg.sender),
@@ -75,7 +85,8 @@ contract market is ReentrancyGuard {
             msg.sender,
             address(0),
             price,
-            false
+            false,
+            block.timestamp
         );
     }
 
@@ -149,7 +160,7 @@ contract market is ReentrancyGuard {
             }
         }
         MarketItem[] memory items = new MarketItem[](itemCount);
-        for (uint256 i = 0; i < itemCount; i++) {
+        for (uint256 i = 0; i < _itemIds.current(); i++) {
             if (idToMarketItem[i + 1].seller == msg.sender) {
                 MarketItem storage item = idToMarketItem[i + 1];
                 items[currentIndex] = item;
@@ -157,5 +168,20 @@ contract market is ReentrancyGuard {
             }
         }
         return items;
+    }
+
+    function TransferItem(
+        address nftContract,
+        uint256 _tokenId,
+        address payable _to
+    ) public returns (uint256) {
+        require(
+            idToMarketItem[_tokenId].owner == msg.sender,
+            "You're is not owner."
+        );
+        idToMarketItem[_tokenId].owner = _to;
+        IERC721(nftContract).transferFrom(msg.sender, _to, _tokenId);
+        emit ItemTransfered(_tokenId, msg.sender, _to, block.timestamp);
+        return _tokenId;
     }
 }

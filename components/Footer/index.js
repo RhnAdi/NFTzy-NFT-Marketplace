@@ -3,17 +3,17 @@ import Image from "next/image"
 export default function Footer(){
    return(
       <>
-      <div className="text-gray-100 border-t border-gray-700 py-10 flex flex-col md:flex-row justify-between gap-8 text-center md:text-left">
+      <div className="text-gray-100 border-t border-gray-300 dark:border-gray-800 py-10 flex flex-col md:flex-row justify-between gap-8 text-center md:text-left">
          <div className="flex flex-col gap-y-4 md:w-80 lg:w-96">
             <div className="flex gap-x-3 justify-center md:justify-start">
                <Image src="/logo.png" width={32} height={32} alt="Logo" />
-               <p className="title text-2xl font-semibold">NFTzy</p>
+               <p className="title text-2xl font-semibold text-gray-900 dark:text-white">NFTzy</p>
             </div>
-            <p className="text-md">NFTzy is a digital marketplace for non-fungitable token.We will to be make better transaction and connection with creator nft in the world.</p>
+            <p className="text-md text-gray-800 dark:text-gray-300">NFTzy is a digital marketplace for non-fungitable token.We will to be make better transaction and connection with creator nft in the world.</p>
          </div>
          <div className="flex flex-col gap-y-4">
-            <p className="text-xl font-large">Marketplace</p>
-            <div className="flex flex-col gap-y-1">
+            <p className="text-xl font-large text-gray-900 dark:text-white">Marketplace</p>
+            <div className="flex flex-col gap-y-1 text-gray-800 dark:text-gray-300">
                <p>All NFTs</p>
                <p>Art</p>
                <p>Music</p>
@@ -25,8 +25,8 @@ export default function Footer(){
             </div>
          </div>
          <div className="flex flex-col gap-y-4">
-            <p className="text-xl font-large">Account</p>
-            <div className="flex flex-col gap-y-1">
+            <p className="text-xl font-large text-gray-900 dark:text-white">Account</p>
+            <div className="flex flex-col gap-y-1 text-gray-800 dark:text-gray-300">
                <p>Creator</p>
                <p>My NFT</p>
                <p>Profile</p>
@@ -34,8 +34,8 @@ export default function Footer(){
             </div>
          </div>
          <div className="flex flex-col gap-y-4">
-            <p className="text-xl font-large">Resources</p>
-            <div className="flex flex-col gap-y-1">
+            <p className="text-xl font-large text-gray-900 dark:text-white">Resources</p>
+            <div className="flex flex-col gap-y-1 text-gray-800 dark:text-gray-300">
                <p>Help Center</p>
                <p>Platform Informations</p>
                <p>Partner</p>

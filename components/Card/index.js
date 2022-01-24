@@ -6,8 +6,10 @@ import Link from "next/link"
 export default function Card({id, name, author, price, image}){
    return(
       <Link href={`/detail/${id}`}>
-      <a className="px-3 py-3 w-full bg-gray-300/70 dark:bg-gray-800/70 rounded-2xl shadow-lg dark:shadow-gray-800/50 text-gray-100">
-         <Image src={`${image}`} width={440} height={360} alt="nft-image" className="rounded-xl" />
+      <a className="px-3 py-3 w-full backdrop-blur-lg bg-gray-300/50 dark:bg-gray-800/50 rounded-2xl shadow-lg dark:shadow-gray-800/50 text-gray-100">
+         <div className="relative w-full h-64 border-gray-300/20 bg-gray-300/50 dark:bg-gray-700/20 rounded-lg">
+            <Image objectFit="contain" objectPosition="center" src={`${image}`} layout="fill" alt="nft-image" className="rounded-xl" />
+         </div>
          <div className="">
             <div className="flex gap-x-3 items-center my-2 px-2">
                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-300 rounded-full"></div>
@@ -17,7 +19,7 @@ export default function Card({id, name, author, price, image}){
                </div>
             </div>
             <div className="flex justify-between px-3 py-2 bg-blue-700 rounded-lg mt-3 items-center">
-               <span className="text-gray-100 font-bold">Current Bid</span>
+               <span className="text-gray-100 font-bold">Price</span>
                <div className="flex items-center gap-x-1">
                   <EthIcon color={colors.gray[100]} width={24} height={24} />
                   <span className="text-lg font-bold font-mono">{price}</span>

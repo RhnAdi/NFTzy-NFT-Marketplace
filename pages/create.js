@@ -1,25 +1,30 @@
+// Component
+import ModalItem from "@/components/ModalItem"
 import Container from "@/components/Container"
-import Sidebar from "@/components/Sidebar"
 import ImageIcon from "@/icons/ImageIcon"
-import Navbar from "@/components/Navbar"
+import Sidebar from "@/components/Sidebar"
 import Footer from "@/components/Footer"
-import colors from "tailwindcss/colors"
+import Navbar from "@/components/Navbar"
 import Input from "@/components/Input"
-import { create } from "ipfs-http-client"
-import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useRouter } from "next/router"
-import Web3 from "web3"
+
+// Utils
+import colors from "tailwindcss/colors"
+import { useState, useEffect } from "react"
+import { create } from "ipfs-http-client"
 import { nftAddress, marketAddress } from "../utils/address"
-import web3Modal from "web3modal";
-import { Dialog } from "@headlessui/react"
 import TokenContract from "../build/contracts/token.json"
 import MarketContract from "../build/contracts/market.json"
-import Link from "next/link"
+
+// Tools
+import Web3 from "web3"
+import axios from "axios"
+import web3Modal from "web3modal";
 import EthIcon from "@/icons/EthIcon"
-import ModalItem from "@/components/ModalItem"
+import optionsProvider from "../utils/Wallet"
 
 export default function Create() {
+   // State
    const [file, setFile] = useState();
    const [fileUrl, setFileUrl] = useState(null);
    const [name, setName] = useState("");
@@ -29,10 +34,10 @@ export default function Create() {
    const [createdItem, setCreatedItem] = useState(false);
    const [newTokenId, setNewTokenId] = useState();
 
+   // Define Ipfs
    const client = create('/ip4/127.0.0.1/tcp/5001');
 
    function _handleUpload (e) {
-      console.log(e.target.files);
       if(e.target.files[0]){
          const fileUri = URL.createObjectURL(e.target.files[0]);
          setFile(e.target.files[0])
@@ -50,6 +55,7 @@ export default function Create() {
          return
       }
       try {
+         // Upload Asset to Ipfs 
          const fileHash =  await client.add(file, {
             progress: (prog) => console.log("Receive:", prog)
          });
@@ -74,25 +80,51 @@ export default function Create() {
    }
 
    async function createSale(url) {
-      const web3modal = new web3Modal("http://localhost:7545");
-      const provider = await web3modal.connect();
-      const web3 = new Web3(provider);
-      const accounts = await web3.eth.getAccounts();
-      const tokenContract = new web3.eth.Contract(TokenContract.abi, nftAddress, {
-         from: accounts[0],
-      });
-      const marketContract = new web3.eth.Contract(MarketContract.abi, marketAddress, {
-         from: accounts[0]
-      });
-      const tx = await tokenContract.methods.createToken(url).send({ from: accounts[0] });
-      const tokenId = await tx.events.Transfer.returnValues.tokenId;
-      setNewTokenId(tokenId);
-      const listingPrice = await marketContract.methods.getListingPrice().call();
-      const marketItem = await marketContract.methods.createMarketItem(nftAddress, tokenId, Web3.utils.toWei(price, "ether")).send({ value: Number(listingPrice), from: accounts[0] });
-      console.log(marketItem);
-      const new_token_id = await marketItem.events.MarketItemCreated.returnValues.tokenId;
-      setNewTokenId(new_token_id);
-      setCreatedItem(true);
+      try {
+         // Connect to Wallet
+         const web3modal = new web3Modal({
+            network: "http://localhost:7545",
+            cacheProvider: true,
+            optionsProvider: optionsProvider(),
+         });
+         const provider = await web3modal.connect();
+         const web3 = new Web3(provider);
+         const accounts = await web3.eth.getAccounts();
+
+         // Define Contract
+         const tokenContract = new web3.eth.Contract(TokenContract.abi, nftAddress, {
+            from: accounts[0],
+         });
+         const marketContract = new web3.eth.Contract(MarketContract.abi, marketAddress, {
+            from: accounts[0]
+         });
+
+         // Create token
+         const tx = await tokenContract.methods.createToken(url).send({ from: accounts[0] });
+         const tokenId = await tx.events.Transfer.returnValues.tokenId;
+         setNewTokenId(tokenId);
+         // Get listing price on marketplace
+         const listingPrice = await marketContract.methods.getListingPrice().call();
+         // Create Market Item
+         const marketItem = await marketContract.methods.createMarketItem(nftAddress, tokenId, Web3.utils.toWei(price, "ether")).send({ value: Number(listingPrice), from: accounts[0] });
+         const item = await marketItem.events.MarketItemCreated.returnValues;
+         // Store data to database
+         const toDb = await axios.post("http://localhost:3000/api/item", {
+            item_id: Number(item.itemId),
+            token_id: Number(item.tokenId),
+            token_uri: url,
+            seller: item.seller,
+            owner: item.owner,
+            price: Number(web3.utils.fromWei(item.price, 'ether')),
+            tx_hash: marketItem.transactionHash
+         });
+         console.log(toDb);
+         setNewTokenId(item.tokenId);
+         // Show Created Item
+         setCreatedItem(true);
+      } catch (error) {
+         console.log(error)
+      }
    }
 
    function _handleCloseCreatedItem () {
@@ -114,7 +146,7 @@ export default function Create() {
                </div>
                <div className="flex justify-between">
                   <p className="w-max flex-1">Description :</p>
-                  <p className="text-right flex-1">{description}.</p>
+                  <p className="text-right flex-1">{description}</p>
                </div>
                <div className="flex justify-between">
                   <p className="w-max flex-1">Price :</p>
@@ -127,8 +159,8 @@ export default function Create() {
          <Sidebar active="Create" />
          <Navbar />
          <Container>
-            <div className="text-gray-900 dark:text-gray-100 mb-20 bg-gray-800/20 p-7 sm:p-8 md:p-10 rounded-lg border-t-8 border-blue-600 shadow-sm">
-               <p className="text-2xl font-bold border-b-2 border-gray-800 pb-4">Create New Item</p>
+            <div className="text-gray-900 dark:text-gray-100 mb-20 backdrop-blur-lg backdrop-filter bg-gray-200/70 dark:bg-gray-800/70 px-4 py-6 sm:p-8 md:p-10 rounded-lg border-t-8 border-blue-600 shadow-sm">
+               <p className="text-2xl font-bold border-b-2 boder-gray-300 dark:border-gray-800 pb-4 text-gray-900 dark:text-white">Create New Item</p>
                <form onSubmit={_handleCreate}>
                <div className="mt-4 mb-10 flex flex-col gap-y-3">
                   <div className="flex flex-col gap-y-2">
@@ -148,25 +180,34 @@ export default function Create() {
                      <input type="file" id="asset" className="hidden" onChange={_handleUpload} required />
                   </div>
                   <Input title="Name" required onChange={(e) => setName(e.target.value)} placeholder={"Asset Name"} value={name} />
-                     
-                     <Input 
-                        title="Price" 
-                        required 
-                        type="number" 
-                        onChange={_handlePrice} 
-                        placeholder={"Asset Price"}
-                        value={price} 
-                        pattern="[0-9]*" 
-                     />
-                     
+                  <div className="flex flex-col gap-y-2">
+                     <label htmlFor="title" className="text-lg">Price <span className="text-red-400">*</span></label>
+                     <div className="flex gap-x-2 w-full">
+                        <input 
+                           className="px-4 py-2 placeholder-gray-500 text-gray-700 dark:placeholder-gray-500 dark:text-gray-400 rounded bg-gray-300/50 dark:bg-gray-800 outline-none focus:ring-2 ring-blue-800/70 flex-grow w-0"
+                           onChange={_handlePrice} 
+                           type="number"
+                           required
+                           id="price"
+                           value={price}
+                           pattern="[0-9]*"
+                           placeholder="Price to ETH"
+                        />
+                        <div className="flex justify-between items-center px-2 bg-gray-200 dark:bg-gray-800 rounded">
+                           <EthIcon width={28} height={28} color={colors.blue[600]} />
+                           <span className="hidden sm:block text-lg text-gray-900 dark:text-gray-100 ml-2 mr-4">Ethereum</span>
+                        </div>
+                     </div>
+                  </div>
                   <div className="flex flex-col gap-y-2">
                      <label className="text-lg" htmlFor="description">Description</label>
                      <textarea
                      onChange={(e) => setDescription(e.target.value)}
                         placeholder="Asset description"
-                        className="px-4 py-2 placeholder-gray-500 dark:placeholder-gray-400 dark:text-gray-400 rounded bg-gray-200 dark:bg-gray-800 outline-none focus:ring-4 ring-blue-700/20 h-32"
+                        className="px-4 py-2 placeholder-gray-500 dark:placeholder-gray-400 dark:text-gray-400 rounded bg-gray-300/50 dark:bg-gray-800 outline-none focus:ring-2 ring-blue-700/70 h-32"
                         id="description"
                         required
+                        value={description}
                      />
                   </div>
                </div>
