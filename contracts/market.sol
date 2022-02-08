@@ -101,8 +101,15 @@ contract market is ReentrancyGuard {
             msg.value == price,
             "Please submit the asking price in order to complete the purchase."
         );
+        require(idToMarketItem[itemId].sold != true, "NFT had sold.");
         idToMarketItem[itemId].seller.transfer(msg.value);
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
+        emit ItemTransfered(
+            tokenId,
+            idToMarketItem[itemId].owner,
+            msg.sender,
+            block.timestamp
+        );
         idToMarketItem[itemId].owner = payable(msg.sender);
         idToMarketItem[itemId].sold = true;
         _itemSold.increment();
@@ -124,7 +131,7 @@ contract market is ReentrancyGuard {
         );
         for (uint256 i = 0; i < _itemIds.current(); i++) {
             if (idToMarketItem[i + 1].owner == address(0)) {
-                MarketItem storage item = idToMarketItem[i + 1];
+                MarketItem memory item = idToMarketItem[i + 1];
                 items[currentIndex] = item;
                 currentIndex += 1;
             }
@@ -174,7 +181,7 @@ contract market is ReentrancyGuard {
         address nftContract,
         uint256 _tokenId,
         address payable _to
-    ) public returns (uint256) {
+    ) public {
         require(
             idToMarketItem[_tokenId].owner == msg.sender,
             "You're is not owner."
@@ -182,6 +189,5 @@ contract market is ReentrancyGuard {
         idToMarketItem[_tokenId].owner = _to;
         IERC721(nftContract).transferFrom(msg.sender, _to, _tokenId);
         emit ItemTransfered(_tokenId, msg.sender, _to, block.timestamp);
-        return _tokenId;
     }
 }

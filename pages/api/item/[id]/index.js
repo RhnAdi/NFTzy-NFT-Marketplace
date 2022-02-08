@@ -6,7 +6,7 @@ export default async function handler (req, res) {
    switch(method) {
       case "GET":
          try {
-            const item = await ItemModel.findById(id);
+            const item = await ItemModel.findOne({ token_id: id });
             res.status(200).json({msg: "Get data success", data: item});
          } catch (error) {
             res.status(400).json({msg: "Get data failed", error: error});

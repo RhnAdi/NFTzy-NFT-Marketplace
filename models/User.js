@@ -7,23 +7,28 @@ const UserSchema = new mongoose.Schema({
    },
    bio: {
       type: String,
+      default: ""
    },
    photo_profile: {
       type: String,
-      required: true
+      default: ""
    },
    banner: {
       type: String,
+      default: ""
    },
    email: {
       type: String,
+      default: ""
    },
    sites: {
-      type: [String]
+      type: [String],
+      default: [],
    },
    address: {
       type: String,
-      required: true
+      required: true,
+      unique: true
    }
 })
 

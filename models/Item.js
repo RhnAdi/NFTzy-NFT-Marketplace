@@ -23,13 +23,6 @@ const HistorySchema = new mongoose.Schema({
    timestamps: true,
 })
 
-const addressSchema = new mongoose.Schema({ 
-   address: { 
-      type: String, 
-      unique: true 
-   } 
-});
-
 const ItemSchema = new mongoose.Schema({
    item_id: {
       type: Number,
@@ -45,14 +38,6 @@ const ItemSchema = new mongoose.Schema({
       type: String,
       required: true,
       unique: true,
-   },
-   like: {
-      type: [addressSchema],
-      default: [],
-   },
-   viewer: {
-      type: [addressSchema],
-      default: [],
    },
    seller: {
       type: String,

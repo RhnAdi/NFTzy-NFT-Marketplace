@@ -4,8 +4,7 @@ import User from "../../../models/User"
 export default async function CreateUser(req, res){
    const { method, body } = req;
    const { address } = req.query;
-   console.log(body)
-   await dbConnect()
+   dbConnect()
    switch(method){
       case "GET":
          try {
@@ -14,6 +13,7 @@ export default async function CreateUser(req, res){
                message: "Get users successfully.",
                data: users
             })
+            return
          } catch (error){
             res.status(400).json({
                message: "Get users Failed.",
@@ -22,18 +22,18 @@ export default async function CreateUser(req, res){
          }
       case "POST":
          try {
-            const user = await User.create({
-               username: body.username,
-               bio: body.bio,
-               email: body.email,
-               address: address,
-               photo_profile: body.photo_profile,
-               banner: body.banner,
-               sites: body.sites
-            });
+            const new_user = new User();
+            new_user.username = body.username;
+            new_user.bio = body.bio;
+            new_user.email = body.email;
+            new_user.address = address;
+            new_user.photo_profile = body.photo_profile;
+            new_user.banner = body.banner;
+            new_user.sites = body.sites;
+            const save = await new_user.save();
             res.status(200).json({
                message: "User Created.",
-               data: user
+               data: save
             })
          } catch (error) {
             res.status(400).json({
@@ -41,7 +41,28 @@ export default async function CreateUser(req, res){
                error: error
             })
          }
+      case "PULL":
+         try {
+            const user = await User.find({address: address})
+            user.username = body.username;
+            user.bio = body.bio
+            user.email = body.email;
+            user.address = address;
+            user.photo_profile = body.photo_profile;
+            user.banner = body.banner;
+            user.sites = body.sites;
+            user.save()
+            res.status(200).json({
+               message: "Edit User Success.",
+               data: user
+            })
+         } catch (error) {
+            res.status(400).json({
+               message: "Failed Edit User.",
+               error: error
+            })
+         }
       default:
-         res.status(400).json({ message: "error" }) 
+         return res.status(400)
    }
 }

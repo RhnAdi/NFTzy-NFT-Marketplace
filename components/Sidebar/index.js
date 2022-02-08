@@ -1,3 +1,4 @@
+// Components
 import DashboardIcon from "@/icons/DashboardIcon"
 import FavoriteIcon from "@/icons/FavoriteIcon"
 import SettingIcon from "@/icons/SettingIcon"
@@ -5,15 +6,22 @@ import MarketIcon from "@/icons/MarketIcon"
 import FolderIcon from "@/icons/FolderIcon"
 import WalletIcon from "@/icons/WalletIcon"
 import ImageIcon from "@/icons/ImageIcon"
-// import styles from "./Sidebar.module.css"
-import colors from "tailwindcss/colors"
 import TimeIcon from "@/icons/TimeIcon"
-import TopIcon from "@/icons/TopIcon"
-import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
+// Utils
+import { useSelector } from "react-redux"
+import colors from "tailwindcss/colors"
+import sortAddress from "../../utils/sortAddress"
+import { useEffect, useState } from "react"
+
+// Tools
+import axios from "axios"
+
 export default function Sidebar({active}){
+   const [username, setUsername] = useState();
+   const [photoProfile, setPhotoProfile] = useState();
    const [activeMenu, setActiveMenu] = useState(active);
    const menu = [
       { title: "Dashboard", href: "/", icon: <DashboardIcon color={colors.blue[(activeMenu == "Dashboard")? 600 : 300]} width={24} height={24} /> },
@@ -28,9 +36,24 @@ export default function Sidebar({active}){
    { title: "Wallet", href: "/accounts/wallet", icon: <WalletIcon color={colors.blue[(activeMenu == "Wallet")? 600 : 300]} width={24} height={24} /> },
    // { title: "History", href: "/", icon: <TimeIcon color={colors.blue[(activeMenu == "History")? 600 : 300]} width={24} height={24} /> },
    { title: "Setting", href: "/accounts/setting", icon: <SettingIcon color={colors.blue[(activeMenu == "Setting")? 600 : 300]} width={24} height={24} /> },  
-   
    ]
-   
+
+   const account = useSelector(state => state.accounts);
+
+   useEffect(() => {
+      (async () => {
+         if(account){
+            try {
+               const res = await axios.get(`/api/user/${account}`);
+               setUsername(res.data.data.username);
+               setPhotoProfile(res.data.data.photo_profile)
+            } catch (error) {
+               return
+            }
+         }
+      })()
+   }, [account])
+
    const _handleMenu = (x) => {
       setActiveMenu(x)
    }
@@ -84,12 +107,14 @@ export default function Sidebar({active}){
                   })
                }
             </div>
-            <div className="bg-gray-200 dark:bg-gray-800 h-20 mx-4 rounded-lg mt-10">
+            <div className="bg-blue-700 shadow-lg shadow-blue-700 mx-4 rounded-lg mt-10">
                <div className="flex items-center px-3 py-3 gap-x-3">
-                  <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+                  <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full relative overflow-hidden">
+                     <Image alt="account" src={ photoProfile || "/images/account.png" } layout="fill" objectPosition={"center"} objectFit="cover" />
+                  </div>
                   <div className="flex my-auto flex-col">
-                     <p className="text-gray-800 dark:text-gray-100 text-lg font-medium">Unnamed</p>
-                     <p className="text-gray-800 dark:text-gray-300">Nothing address</p>
+                     <p className="text-lg font-medium text-white">{username ?  username : "Unnamed"}</p>
+                     <p className="text-gray-200">{account? sortAddress(account) : "Nothing Address"}</p>
                   </div>
                </div>
             </div>

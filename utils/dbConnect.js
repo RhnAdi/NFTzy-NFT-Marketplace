@@ -19,33 +19,48 @@ if (!MONGODB_URI) {
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
-let cached = global.mongoose
+// let cached = global.mongoose
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null }
-}
+// if (!cached) {
+//   cached = global.mongoose = { conn: null, promise: null }
+// }
 
 async function dbConnect () {
-  if (cached.conn) {
-    return cached.conn
-  }
+  // if (cached.conn) {
+  //   return cached.conn
+  // }
 
-  if (!cached.promise) {
-    const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      bufferCommands: false,
-      bufferMaxEntries: 0,
-      useFindAndModify: true,
-      useCreateIndex: true
-    }
+  // if (!cached.promise) {
+  //   const opts = {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true,
+  //     bufferCommands: false,
+  //     bufferMaxEntries: 0,
+  //     useFindAndModify: true,
+  //     useCreateIndex: true
+  //   }
 
-    cached.promise = mongoose.connect(MONGODB_URI).then(mongoose => {
-      return mongoose
-    })
-  }
-  cached.conn = await cached.promise
-  return cached.conn
+  //   cached.promise = mongoose.connect(MONGODB_URI,).then(mongoose => {
+  //     return mongoose
+  //   })
+  // }
+  // cached.conn = await cached.promise
+  // return cached.conn
+  const opts = {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        bufferCommands: false,
+        bufferMaxEntries: 0,
+        useFindAndModify: true,
+        useCreateIndex: true
+      }
+  mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log("Database Connected.")
+  })
+  .catch(() => {
+    console.log("Databse not Connected.")
+  })
 }
 
 export default dbConnect

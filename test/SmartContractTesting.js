@@ -79,6 +79,7 @@ contract("NFTzy", (accounts) => {
                   seller: i.seller,
                   owner: i.owner,
                   tokenURI,
+                  created: i.created.toString()
                }
                return item;
             }))
@@ -89,5 +90,16 @@ contract("NFTzy", (accounts) => {
             assert.ok(false)
          }
       })
+      it("Transfer Item", async () => {
+         try {
+            const tokenTransferd = await this.market.TransferItem(this.nftContractAddress, 1, accounts[1], { from: accounts[0] });
+            const tokenOwner = await this.NFT.ownerOf(1);
+            assert.equal(tokenOwner, accounts[1], "Transfer Item Failed.");
+         } catch (error) {
+            console.log(error);
+            assert.ok(false)
+         }
+      })
+      
    })
 })

@@ -3,10 +3,13 @@ import SearchIcon from "@/icons/SearchIcon";
 import MenuIcon from "@/icons/MenuIcon";
 import UserIcon from "@/icons/UserIcon";
 import colors from "tailwindcss/colors";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ButtonWallet from "../ButtonWallet";
 import DarkModeToggle from "../DarkModeToggle";
+import { useSelector } from "react-redux";
+import sortAddress from "utils/sortAddress";
+import axios from "axios";
 
 export default function Navbar({active}){
    const [sidebar, setSidebar] = useState(false);
@@ -21,6 +24,9 @@ export default function Navbar({active}){
       { title: "Setting", href: "/accounts/setting" },  
    ]
    const [activeMenu , setActiveMenu] = useState(active);
+
+   const account = useSelector(state => state.accounts);
+
    return(
       <div className="fixed z-40">
          <div className={`bg-gray-50/60 dark:bg-gray-900/60 backdrop-filter backdrop-blur-lg flex text-white lg:pl-72 md:px-10 sm:px-10 px-3 h-16 md:h-20 items-center justify-between shadow shadow-gray-100/50 dark:shadow-gray-800/50 gap-x-4 absolute w-screen z-40`}>
@@ -36,9 +42,9 @@ export default function Navbar({active}){
             <div className="flex md:gap-x-6 sm:gap-x-6 gap-x-3 sm:mr-5">
                <DarkModeToggle />
                <ButtonWallet />
-               <button className="focus:bg-gray-200 dark:focus:bg-gray-800 p-2 rounded">
+               {/* <button className="focus:bg-gray-200 dark:focus:bg-gray-800 p-2 rounded">
                   <NotificationIcon color={colors.blue[700]} width={24} height={24} />
-               </button>
+               </button> */}
                <button className="focus:bg-gray-200 dark:focus:bg-gray-800 p-2 rounded">
                   <UserIcon color={colors.blue[700]} width={24} height={24} />
                </button>
@@ -75,7 +81,16 @@ export default function Navbar({active}){
                })
             }
             </div>
+            <div className="bg-blue-700 shadow-lg shadow-blue-700n rounded-lg mt-10">
+               <div className="flex items-center px-6 py-3 gap-x-3">
+                  <div className="flex my-auto flex-col">
+                     <p className="text-gray-100">Account</p>
+                     <p className="text-gray-200">{account? sortAddress(account) : "Nothing address"}</p>
+                  </div>
+               </div>
+            </div>
          </div>
+            
       </div>
    )
 }

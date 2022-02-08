@@ -1,12 +1,13 @@
 import { createStore } from "redux"
-import { SET_ACCOUNT, SET_MARKETCONTRACT, SET_TOKENCONTRACT, SET_WEB3 } from "./Type"
+import axios from "axios"
+import { SET_ACCOUNT, SET_MARKETCONTRACT, SET_TOKENCONTRACT, SET_WEB3, SET_USERNAME } from "./Type"
 
 // Initialisize State
 const initState = {
    accounts: null,
    web3: null,
    marketContract: null,
-   tokenContract: null
+   tokenContract: null,
 }
 
 const rootReducer = (state = initState, action) => {
@@ -17,7 +18,6 @@ const rootReducer = (state = initState, action) => {
             web3: action.payload
          }
       case SET_ACCOUNT:
-         console.log(action.payload)
          return {
             ...state,
             accounts: action.payload
@@ -31,6 +31,11 @@ const rootReducer = (state = initState, action) => {
          return {
             ...state,
             marketContract: action.payload
+         }
+      case SET_USERNAME:
+         return {
+            ...state,
+            username: action.payload
          }
       default:
          return state

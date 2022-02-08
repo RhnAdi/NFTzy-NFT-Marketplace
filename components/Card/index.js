@@ -3,16 +3,19 @@ import Image from "next/image"
 import colors from "tailwindcss/colors"
 import Link from "next/link"
 
-export default function Card({id, name, author, price, image}){
+export default function Card({id, name, author, price, image, profile_photo}){
+   console.log(image)
    return(
       <Link href={`/detail/${id}`}>
-      <a className="px-3 py-3 w-full backdrop-blur-lg bg-gray-300/50 dark:bg-gray-800/50 rounded-2xl shadow-lg dark:shadow-gray-800/50 text-gray-100">
+      <a className="px-3 py-3 w-full backdrop-blur rounded-2xl shadow-lg dark:shadow-gray-800/50 text-gray-100 border-2 border-white/50 dark:border-gray-800/40">
          <div className="relative w-full h-64 border-gray-300/20 bg-gray-300/50 dark:bg-gray-700/20 rounded-lg">
             <Image objectFit="contain" objectPosition="center" src={`${image}`} layout="fill" alt="nft-image" className="rounded-xl" />
          </div>
          <div className="">
             <div className="flex gap-x-3 items-center my-2 px-2">
-               <div className="h-10 w-10 bg-gray-100 dark:bg-gray-300 rounded-full"></div>
+               <div className="h-10 w-10 bg-gray-100 dark:bg-gray-300 rounded-full relative overflow-hidden">
+                  <Image src={profile_photo || "/images/account.png"} layout="fill" objectFit="center" objectPosition="center" alt="photo_profile" />
+               </div>
                <div className="">
                   <p className="text-lg font-bold text-gray-900 dark:text-gray-200">{name}</p>
                   <span className="text-md text-gray-700 dark:text-gray-300">{author}</span>

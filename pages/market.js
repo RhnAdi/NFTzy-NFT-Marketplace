@@ -1,30 +1,41 @@
-import Sidebar from "@/components/Sidebar"
-import Navbar from "@/components/Navbar"
+// Components
+import SekeletonCard from "@/components/Card/SekeletonCard"
 import Container from "@/components/Container"
-import Card from "@/components/Card"
+import Sidebar from "@/components/Sidebar"
 import Footer from "@/components/Footer"
+import Navbar from "@/components/Navbar"
+import Card from "@/components/Card"
+
+// Utils
 import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import NFTContract from "../build/contracts/token.json";
 import NFTzyContract from "../build/contracts/market.json";
 import { nftAddress, marketAddress } from "../utils/address";
-import axios from "axios"
-import Web3Modal from "web3modal"
-import Web3 from "web3"
 import { SET_TOKENCONTRACT, SET_MARKETCONTRACT, SET_ACCOUNT, SET_WEB3 } from "utils/redux/Type"
+
+// Tools
 import sortAddress from "utils/sortAddress"
-import SekeletonCard from "@/components/Card/SekeletonCard"
+import Web3Modal from "web3modal"
+import axios from "axios"
+import Web3 from "web3"
 
 
 export default function Market () {
+   // Define State
+   const [loading, setLoading] = useState(false);
+   const [NFTs, setNFTs] = useState([]);
+   
+   // Redux State
+   const tokenContract = useSelector(state => state.tokenContract);
+   const marketContract = useSelector(state => state.marketContract);
    const accounts = useSelector(state => state.accounts);
    const web3 = useSelector(state => state.web3);
-   const marketContract = useSelector(state => state.marketContract);
-   const tokenContract = useSelector(state => state.tokenContract);
-   const [NFTs, setNFTs] = useState([]);
-   const [loading, setLoading] = useState(false);
 
+   // Redux Dispatch
    const dispatch = useDispatch();
+
+   const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
    const renderData = async () => {
       setLoading(true)
@@ -34,14 +45,18 @@ export default function Market () {
             const tokenUri = await tokenContract.methods.tokenURI(item.tokenId).call();
             const meta = await axios.get(tokenUri);
             const price = item.price.toString();
+            const res = await axios.get(`/api/user/${item.seller}`);
+            const sellerAccount = res.data.data?.username;
+            const photoAccount = res.data.data?.photo_profile;
             const nft = {
                price,
                tokenId: parseInt(item.tokenId),
-               seller: item.seller,
+               seller: sellerAccount || sortAddress(item.seller),
                owner: item.owner,
                image: meta.data.image,
                name: meta.data.name,
-               description: meta.data.description
+               description: meta.data.description,
+               photo_profile: photoAccount
             }
             return nft
          }))
@@ -59,14 +74,18 @@ export default function Market () {
             const tokenUri = await tokenContract.methods.tokenURI(item.tokenId).call();
             const meta = await axios.get(tokenUri);
             const price = item.price.toString();
+            const res = await axios.get(`/api/user/${item.seller}`);
+            const sellerAccount = res.data.data?.username;
+            const photoAccount = res.data.data?.photo_profile;
             const nft = {
                price,
                tokenId: parseInt(item.tokenId),
-               seller: item.seller,
+               seller: sellerAccount || sortAddress(item.seller),
                owner: item.owner,
                image: meta.data.image,
                name: meta.data.name,
-               description: meta.data.description
+               description: meta.data.description,
+               photo_profile: photoAccount
             }
             return nft
          }))
@@ -76,11 +95,11 @@ export default function Market () {
          setNFTs(data);
          setLoading(false)
       } else {
-         const web3 = await new Web3('http://127.0.0.1:7545');
-         const tokenContract = await new web3.eth.Contract(NFTContract.abi, nftAddress, {
+         const web3 = new Web3(process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK);
+         const tokenContract = new web3.eth.Contract(NFTContract.abi, nftAddress, {
             data: NFTContract.bytecode,
          })
-         const marketContract = await new web3.eth.Contract(NFTzyContract.abi, marketAddress, {
+         const marketContract = new web3.eth.Contract(NFTzyContract.abi, marketAddress, {
             data: NFTzyContract.bytecode,
          });
          const items = await marketContract.methods.fetchMarketItems().call();
@@ -88,14 +107,18 @@ export default function Market () {
             const tokenUri = await tokenContract.methods.tokenURI(item.tokenId).call();
             const meta = await axios.get(tokenUri);
             const price = item.price.toString();
+            const res = await axios.get(`/api/user/${item.seller}`);
+            const sellerAccount = res.data.data?.username;
+            const photoAccount = res.data.data?.photo_profile;
             const nft = {
                price,
                tokenId: parseInt(item.tokenId),
-               seller: item.seller,
+               seller: sellerAccount || sortAddress(item.seller),
                owner: item.owner,
                image: meta.data.image,
                name: meta.data.name,
-               description: meta.data.description
+               description: meta.data.description,
+               photo_profile: photoAccount
             }
             return nft
          }))
@@ -126,7 +149,6 @@ export default function Market () {
                </>
                :
                NFTs.map((nft, index) => {
-                  const address = sortAddress(nft.seller)
                   return(
                      <Card 
                         key={index}
@@ -134,7 +156,8 @@ export default function Market () {
                         name={nft.name} 
                         price={web3.utils.fromWei(nft.price, "ether")} 
                         image={nft.image}
-                        author={address}
+                        author={nft.seller}
+                        profile_photo={nft.photo_profile}
                      />
                   )
                })

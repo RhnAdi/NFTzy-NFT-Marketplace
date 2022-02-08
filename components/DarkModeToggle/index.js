@@ -5,9 +5,6 @@ import { useTheme } from "next-themes"
 
 export default function DarkModeToggle () {
    const { theme, setTheme } = useTheme()
-   function _handleTheme (){
-      setTheme(theme == "dark" ? "light" : "dark")
-   }
 
    if(theme == "light"){
       return(

@@ -11,9 +11,7 @@ import Footer from "@/components/Footer";
 import { useState, useEffect } from "react";
 
 import Web3 from "web3";
-import Web3Modal from "web3modal";
-import WalletConnectProvider from "@walletconnect/web3-provider";
-import Authereum from "authereum";
+import sortAddress from "../utils/sortAddress";
 import NFTcontract from "../build/contracts/token.json";
 import NFTzycontract from "../build/contracts/market.json";
 import { marketAddress, nftAddress } from "../utils/address";
@@ -22,7 +20,7 @@ import axios from "axios";
 import SekeletonCard from "@/components/Card/SekeletonCard";
 import { SET_MARKETCONTRACT, SET_TOKENCONTRACT, SET_WEB3 } from "utils/redux/Type";
 
-const Home = () => {
+const Home = (props) => {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -30,12 +28,12 @@ const Home = () => {
   const marketContract = useSelector(state => state.web3);
   const tokenContract = useSelector(state => state.web3);
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const initial = async () => {
     setLoading(true);
     try {
-      const web3 = new Web3('http://127.0.0.1:7545');
+      const web3 = new Web3(process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK);
       const marketContract = await new web3.eth.Contract(NFTzycontract.abi, marketAddress);
       const tokenContract = await new web3.eth.Contract(NFTcontract.abi, nftAddress);
       const items = await marketContract.methods.fetchMarketItems().call();
@@ -43,6 +41,9 @@ const Home = () => {
         const tokenUri = await tokenContract.methods.tokenURI(item.tokenId).call();
         const meta = await axios.get(tokenUri);
         const price = await item.price.toString();
+        const res = await axios.get(`/api/user/${item.seller}`);
+        const sellerAccount = res.data.data?.username;
+        const photoAccount = res.data.data?.photo_profile;
         const nft = {
           tokenId: parseInt(item.tokenId),
           name: meta.data.name,
@@ -50,7 +51,8 @@ const Home = () => {
           image: meta.data.image,
           price: price,
           owner: item.owner,
-          seller: item.seller,
+          seller: sellerAccount || sortAddress(item.seller),
+          photo_profile: photoAccount
         }
         return nft;
       }));
@@ -75,7 +77,7 @@ const Home = () => {
       <Navbar />
       <Container>
         <>
-          <Hero />
+          <Hero randomItem={props?.randomItem} />
           {
             loading?
             <div className="text-gray-100 my-10">
@@ -92,7 +94,7 @@ const Home = () => {
             :
             <Trending trending_nft={nfts} />
           }
-          <TopCreator />
+          <TopCreator data={props?.mostCreator} />
           <Categories />
           <BuyCreateAndSell />
           <Community />
@@ -104,3 +106,25 @@ const Home = () => {
 }
 
 export default Home;
+
+export async function getServerSideProps() {
+  try {
+    const getRandomItem = await axios.get("http://localhost:3000/api/item/get_random_item");
+    const getMostCreator = await axios.get("http://localhost:3000/api/most_creator");
+    const randomItem = getRandomItem.data.data;
+    const mostCreator = getMostCreator.data;
+    return {
+      props: {
+        randomItem,
+        mostCreator
+      }
+    }
+  } catch(error) {
+    console.log(error)
+    return {
+      props: {
+        error: true
+      }
+    }
+  }
+}

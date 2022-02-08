@@ -35,7 +35,7 @@ export default function Create() {
    const [newTokenId, setNewTokenId] = useState();
 
    // Define Ipfs
-   const client = create('/ip4/127.0.0.1/tcp/5001');
+   const client = create('https://ipfs.infura.io:5001/api/v0');
 
    function _handleUpload (e) {
       if(e.target.files[0]){
@@ -59,19 +59,19 @@ export default function Create() {
          const fileHash =  await client.add(file, {
             progress: (prog) => console.log("Receive:", prog)
          });
-         const fileUri = await `http://127.0.0.1:8080/ipfs/${fileHash.path}`;
+         const fileUri = await `https://ipfs.infura.io/ipfs/${fileHash.path}`;
          if(!name && !description && !price && !fileHash) return
          const data = JSON.stringify({
             name, description, image: fileUri
          })
          const added = await client.add(data);
-         const url = `http://127.0.0.1:8080/ipfs/${added.path}`;
+         const url = `https://ipfs.infura.io/ipfs/${added.path}`;
 
          await createSale(url);
          setWaitingTx(false);
       } catch (error) {
-         setWaitingTx(false)
-;         console.log(error);
+         setWaitingTx(false);         
+         console.log(error);
       }
    }
 
@@ -83,7 +83,7 @@ export default function Create() {
       try {
          // Connect to Wallet
          const web3modal = new web3Modal({
-            network: "http://localhost:7545",
+            network: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
             cacheProvider: true,
             optionsProvider: optionsProvider(),
          });
@@ -108,8 +108,11 @@ export default function Create() {
          // Create Market Item
          const marketItem = await marketContract.methods.createMarketItem(nftAddress, tokenId, Web3.utils.toWei(price, "ether")).send({ value: Number(listingPrice), from: accounts[0] });
          const item = await marketItem.events.MarketItemCreated.returnValues;
+         setNewTokenId(item.tokenId);
+         // Show Created Item
+         setCreatedItem(true);
          // Store data to database
-         const toDb = await axios.post("http://localhost:3000/api/item", {
+         const toDb = await axios.post("/api/item", {
             item_id: Number(item.itemId),
             token_id: Number(item.tokenId),
             token_uri: url,
@@ -118,10 +121,6 @@ export default function Create() {
             price: Number(web3.utils.fromWei(item.price, 'ether')),
             tx_hash: marketItem.transactionHash
          });
-         console.log(toDb);
-         setNewTokenId(item.tokenId);
-         // Show Created Item
-         setCreatedItem(true);
       } catch (error) {
          console.log(error)
       }
@@ -140,17 +139,17 @@ export default function Create() {
          {
             (createdItem)?
             <ModalItem image={fileUrl} onClose={_handleCloseCreatedItem} message={"Your NFT has been minted and sell"} tokenId={newTokenId} >
-               <div className="flex justify-between">
+               <div className="flex justify-between text-gray-800 dark:text-gray-200">
                   <p className="flex-1">Name :</p>
                   <p>{name}</p>
                </div>
-               <div className="flex justify-between">
+               <div className="flex justify-between text-gray-800 dark:text-gray-200">
                   <p className="w-max flex-1">Description :</p>
                   <p className="text-right flex-1">{description}</p>
                </div>
-               <div className="flex justify-between">
+               <div className="flex justify-between text-gray-800 dark:text-gray-200">
                   <p className="w-max flex-1">Price :</p>
-                  <p className="text-right flex-1 flex items-center gap-x-2 justify-end"><EthIcon width={24} height={24} color={colors.gray[300]} /> {price}</p>
+                  <p className="text-right flex-1 flex items-center gap-x-2 justify-end"><EthIcon width={24} height={24} color={colors.blue[600]} /> {price}</p>
                </div>
             </ModalItem>
             :
@@ -159,17 +158,17 @@ export default function Create() {
          <Sidebar active="Create" />
          <Navbar />
          <Container>
-            <div className="text-gray-900 dark:text-gray-100 mb-20 backdrop-blur-lg backdrop-filter bg-gray-200/70 dark:bg-gray-800/70 px-4 py-6 sm:p-8 md:p-10 rounded-lg border-t-8 border-blue-600 shadow-sm">
-               <p className="text-2xl font-bold border-b-2 boder-gray-300 dark:border-gray-800 pb-4 text-gray-900 dark:text-white">Create New Item</p>
+            <div className="text-gray-900 dark:text-gray-100 mb-20 backdrop-blur-lg backdrop-filter px-4 py-6 sm:p-8 md:p-10 rounded-lg border-2 border-white/50 dark:border-gray-800/50 shadow-sm">
+               <p className="text-2xl font-bold border-b-2 border-blue-700/20 dark:border-gray-800 pb-4 text-gray-900 dark:text-white">Create New Item</p>
                <form onSubmit={_handleCreate}>
                <div className="mt-4 mb-10 flex flex-col gap-y-3">
                   <div className="flex flex-col gap-y-2">
                      <p className="text-lg">Asset <span className="text-red-400">*</span></p>
                      <label htmlFor="asset" className="cursor-pointer w-min">
-                        <div className="w-44 h-44 bg-gray-300 dark:bg-gray-800 flex justify-center items-center rounded-lg overflow-hidden">
+                        <div className="w-44 h-44 bg-gray-50 dark:bg-gray-800/20 flex justify-center items-center rounded-lg overflow-hidden shadow-sm border-2 border-white/50 dark:border-gray-700/10">
                            {
                               fileUrl == null?
-                                 <ImageIcon color={colors.gray[100]} width={42} height={42} />
+                                 <ImageIcon color={colors.gray[300]} width={42} height={42} />
                               :
                                  <div className="w-full h-full relative"> 
                                     <Image layout="fill" alt="file" className="w-full h-full" objectFit="cover" objectPosition={"center"} src={fileUrl} />
@@ -184,7 +183,7 @@ export default function Create() {
                      <label htmlFor="title" className="text-lg">Price <span className="text-red-400">*</span></label>
                      <div className="flex gap-x-2 w-full">
                         <input 
-                           className="px-4 py-2 placeholder-gray-500 text-gray-700 dark:placeholder-gray-500 dark:text-gray-400 rounded bg-gray-300/50 dark:bg-gray-800 outline-none focus:ring-2 ring-blue-800/70 flex-grow w-0"
+                           className="px-4 py-2 placeholder-gray-500 text-gray-700 dark:placeholder-gray-500 dark:text-gray-400 rounded bg-white dark:bg-gray-800/20 outline-none focus:ring-2 ring-blue-800/70 flex-grow w-0 border-2 border-white/50 bg-gray-50 shadow-sm dark:border-gray-700/10"
                            onChange={_handlePrice} 
                            type="number"
                            required
@@ -193,7 +192,7 @@ export default function Create() {
                            pattern="[0-9]*"
                            placeholder="Price to ETH"
                         />
-                        <div className="flex justify-between items-center px-2 bg-gray-200 dark:bg-gray-800 rounded">
+                        <div className="flex justify-between items-center px-2 bg-gray-50 border-2 border-white/50 shadow dark:bg-gray-800/20 rounded dark:border-gray-700/10">
                            <EthIcon width={28} height={28} color={colors.blue[600]} />
                            <span className="hidden sm:block text-lg text-gray-900 dark:text-gray-100 ml-2 mr-4">Ethereum</span>
                         </div>
@@ -204,7 +203,7 @@ export default function Create() {
                      <textarea
                      onChange={(e) => setDescription(e.target.value)}
                         placeholder="Asset description"
-                        className="px-4 py-2 placeholder-gray-500 dark:placeholder-gray-400 dark:text-gray-400 rounded bg-gray-300/50 dark:bg-gray-800 outline-none focus:ring-2 ring-blue-700/70 h-32"
+                        className="px-4 py-2 placeholder-gray-500 dark:placeholder-gray-400 dark:text-gray-400 rounded bg-gray-50 dark:bg-gray-800/20 outline-none focus:ring-2 ring-blue-700/70 h-32 border-2 border-white/50 dark:border-gray-700/10"
                         id="description"
                         required
                         value={description}
@@ -221,7 +220,7 @@ export default function Create() {
                      Processing...
                   </button>
                   :
-                  <button type="submit" className="text-lg font-bold px-8 py-3 rounded bg-blue-800 shadow shadow-blue-800/50 text-gray-100 w-full">Create</button>
+                  <button type="submit" className="text-lg font-bold px-8 py-3 rounded bg-blue-700 shadow shadow-blue-800/50 text-gray-100 w-full" >Create</button>
                }
                </form>
             </div>

@@ -12,7 +12,7 @@ export default function ButtonWallet () {
       try {
          const web3Modal = new Web3Modal({
             cacheProvider: true,
-            network: 'http://localhost:7545',
+            network: process.env.BLOCKCHAIN_NETWORK,
             providerOptions: providerOptions(),
          });
          web3Modal.clearCachedProvider();
@@ -20,7 +20,7 @@ export default function ButtonWallet () {
          const web3 = new Web3(provider);
          const accounts = await web3.eth.getAccounts();
          dispatch({ type: SET_WEB3, payload: web3 });
-         dispatch({ type: SET_ACCOUNT, payload: accounts });
+         dispatch({ type: SET_ACCOUNT, payload: accounts[0] });
       } catch (error) {
          console.log(error);
       }

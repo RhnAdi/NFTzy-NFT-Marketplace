@@ -22,12 +22,12 @@ export default  function Wallet() {
                   <div className="bg-gray-200/70 backdrop-blur dark:bg-gray-800 py-8 flex flex-col items-center rounded-lg gap-y-2 px-3">
                      <Image src="/images/walletconnect.png" width={50} height={50} alt="metamask" className="bg-gray-800 rounded-full" />
                      <p className="text-xl text-gray-900 dark:text-white">Wallet Connect</p>
-                     <p className="text-gray-300 text-center text-gray-800 dark:text-gray-300">Connected to wallet connect provider.</p>
+                     <p className="text-center text-gray-800 dark:text-gray-300">Connected to wallet connect provider.</p>
                   </div>
                   <div className="bg-gray-200/70 backdrop-blur dark:bg-gray-800 py-8 flex flex-col items-center rounded-lg gap-y-2 px-3">
                      <Image src="/images/authereum.png" width={50} height={50} alt="authereum" className="bg-gray-800 rounded-full" />
                      <p className="text-xl text-gray-900 dark:text-white">Authereum</p>
-                     <p className="text-gray-300 text-center text-gray-800 dark:text-gray-300">Connected to Authereum wallet provider.</p>
+                     <p className="text-center text-gray-800 dark:text-gray-300">Connected to Authereum wallet provider.</p>
                   </div>
                </div>
             </div>
