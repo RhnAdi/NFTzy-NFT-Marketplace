@@ -21,20 +21,12 @@ export default async function handler (req, res) {
                seller: body.seller,
                owner: body.owner,
                price: body.price,
+               name: body.name.toLowerCase(),
+               description: body.description.toLowerCase(),
+               image: body.image
             })
             const history = new_item.history.create({ type: "minted", from: body.seller, to: body.owner, tx_hash: body.tx_hash })
             new_item.history.push(history)
-            // const data = await Item.create({
-            //    item_id: body.item_id,
-            //    token_id: body.token_id,
-            //    token_uri: body.token_uri,
-            //    seller: body.seller,
-            //    owner: body.owner,
-            //    price: body.price,
-            //    history: [
-            //       { type: "minted", from: body.seller, to: body.owner, tx_hash: body.tx_hash }
-            //    ]
-            // })
             const data = await new_item.save();
             res.status(200).json({msg: "Item created success", data: data})
          } catch (error) {

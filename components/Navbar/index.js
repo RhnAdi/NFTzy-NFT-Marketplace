@@ -10,9 +10,12 @@ import DarkModeToggle from "../DarkModeToggle";
 import { useSelector } from "react-redux";
 import sortAddress from "utils/sortAddress";
 import axios from "axios";
+import { useRouter } from "next/router"
 
 export default function Navbar({active}){
+   const Router = useRouter();
    const [sidebar, setSidebar] = useState(false);
+   const [keyword, setKeyword] = useState("");
    const menu = [
       { title: "Dashboard", href: "/" },
       { title: "Market", href: "/market" },
@@ -36,16 +39,20 @@ export default function Navbar({active}){
                </div>
                <div className="items-center bg-gray-200 dark:bg-gray-800 px-3 py-2 md:px-3 md:py-2 rounded lg:w-96 md:w-72 sm:w-64 lg:flex hidden">
                   <SearchIcon color={colors.blue[700]} width={24} height={24} />
-                  <input placeholder="Search" className="bg-transparent outline-none ml-4 text-sm w-full" />
+                  <form
+                     onSubmit={(e) => {
+                        e.preventDefault();
+                        Router.push({pathname: "/market", query: { keyword: keyword } })
+                     }}
+                  >
+                     <input placeholder="Search" className="bg-transparent outline-none ml-4 text-sm w-full text-gray-800 dark:text-gray-100" onChange={(e) => setKeyword(e.target.value)} value={keyword} />
+                  </form>
                </div>
             </div>
             <div className="flex md:gap-x-6 sm:gap-x-6 gap-x-3 sm:mr-5">
                <DarkModeToggle />
                <ButtonWallet />
-               {/* <button className="focus:bg-gray-200 dark:focus:bg-gray-800 p-2 rounded">
-                  <NotificationIcon color={colors.blue[700]} width={24} height={24} />
-               </button> */}
-               <button className="focus:bg-gray-200 dark:focus:bg-gray-800 p-2 rounded">
+               <button className="focus:bg-gray-200 dark:focus:bg-gray-800 p-2 rounded" onClick={() => Router.push("/accounts/profile")}>
                   <UserIcon color={colors.blue[700]} width={24} height={24} />
                </button>
             </div>
@@ -53,7 +60,14 @@ export default function Navbar({active}){
          <div className={`z-20 bg-gray-50/60 dark:bg-gray-900/60 backdrop-filter backdrop-blur-lg absolute lg:pl-72 md:px-10 pl-3 pr-3 pt-20 shadow-md shadow-gray-100 dark:shadow-gray-800 w-64 h-screen text-gray-100 ${sidebar? "block": "hidden"}`}>
             <div className="flex gap-x-4 bg-gray-300/50 dark:bg-gray-900/50 backdrop-filter backdrop-blur-lg py-2 px-4 rounded mb-3">
                <SearchIcon color={colors.blue[700]} width={24} height={24} />
-               <input placeholder="Search" className="w-full bg-transparent outline-none text-gray-800 dark:text-gray-100" />
+               <form 
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     Router.push({pathname: "/market", query: { keyword: keyword }})
+                  }}
+               >
+               <input placeholder="Search" className="w-full bg-transparent outline-none text-gray-800 dark:text-gray-100" onChange={(e) => setKeyword(e.target.value)} value={keyword} />
+               </form >
             </div>
             <p className="tracking-widest text-gray-600 text-gray-500 dark:text-gray-300 mb-2 font-medium">Marketplace</p>
             {

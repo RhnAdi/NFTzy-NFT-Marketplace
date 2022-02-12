@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar"
 import Card from "@/components/Card"
 
 // Utils
+import { useRouter } from "next/router";
 import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import NFTContract from "../build/contracts/token.json";
@@ -21,10 +22,14 @@ import axios from "axios"
 import Web3 from "web3"
 
 
-export default function Market () {
+export default function Market ({searching = []}) {
+   console.log(searching)
+   // Define Router
+   const Router = useRouter();
+
    // Define State
    const [loading, setLoading] = useState(false);
-   const [NFTs, setNFTs] = useState([]);
+   const [NFTs, setNFTs] = useState(searching);
    
    // Redux State
    const tokenContract = useSelector(state => state.tokenContract);
@@ -128,8 +133,22 @@ export default function Market () {
       }
    }
 
+   const _handleSearch = async () => {
+      const res = await axios.get(`/api/item/search?keyword=${Router.query.keyword}`);
+      console.log(res.data )
+      setNFTs(res.data.data)
+   }
+
    useEffect(() => {
-      renderData()
+      if(
+         Router.query?.keyword &&
+         Router.query.keyword !== ""
+      ) {
+         console.log(Router.query.keyword)
+         _handleSearch()
+      } else {
+         renderData()
+      }
    }, [])
    return(
       <div className="bg-gray-100 dark:bg-gray-900">
@@ -167,4 +186,22 @@ export default function Market () {
          </Container>
       </div>
    )
+}
+
+export async function getServerSideProps ({ query }) {
+   try {
+      const res_search = await axios.get(`http://localhost:3000/api/item/search?keyword=${query.keyword}`);
+      let data = 
+      return {
+         props: {
+            searching: res_search.data.data
+         }
+      }
+   } catch (error) {
+      return {
+         props: {
+            error: true
+         }
+      }
+   }
 }

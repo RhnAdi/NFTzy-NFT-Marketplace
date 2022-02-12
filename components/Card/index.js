@@ -4,7 +4,6 @@ import colors from "tailwindcss/colors"
 import Link from "next/link"
 
 export default function Card({id, name, author, price, image, profile_photo}){
-   console.log(image)
    return(
       <Link href={`/detail/${id}`}>
       <a className="px-3 py-3 w-full backdrop-blur rounded-2xl shadow-lg dark:shadow-gray-800/50 text-gray-100 border-2 border-white/50 dark:border-gray-800/40">

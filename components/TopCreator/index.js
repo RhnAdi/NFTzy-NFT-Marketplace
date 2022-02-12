@@ -1,23 +1,12 @@
 import sortAddress from "../../utils/sortAddress";
 import Image from "next/image"
+import Link from "next/link"
 
 export default function TopCreator({data}){
-   // const creators = [
-   //    { name: "Horse Man", portofolio: "100000 ETH" },
-   //    { name: "Diggie Crypto", portofolio: "100000 ETH" },
-   //    { name: "Scratch Anime", portofolio: "100000 ETH" },
-   //    { name: "Mustang", portofolio: "100000 ETH" },
-   //    { name: "Sword Style", portofolio: "100000 ETH" },
-   //    { name: "Kraken Crypto", portofolio: "100000 ETH" },
-   //    { name: "Dragon Strom", portofolio: "100000 ETH" },
-   //    { name: "Space", portofolio: "100000 ETH" },
-   //    { name: "The Mountain", portofolio: "100000 ETH" },
-   //    { name: "Apes Crypto", portofolio: "100000 ETH" },
-   // ];
 
-   const slicer = Math.ceil(data.length / 2);
-   const creator1 = data.slice(0, slicer);
-   const creator2 = data.slice(slicer, slicer * 2);
+   const slicer = Math.ceil(data?.length / 2);
+   const creator1 = data?.slice(0, slicer);
+   const creator2 = data?.slice(slicer, slicer * 2);
 
    return(
       <div id="top_creator" className="text-gray-100 my-10">
@@ -25,9 +14,10 @@ export default function TopCreator({data}){
          <div className="flex flex-col md:flex-row gap-x-5">
             <div className="w-full">
                {
-                  creator1.map((creator, index) => {
+                  creator1?.map((creator, index) => {
                      return(
-                        <div key={index} className="flex items-center border-b border-gray-200 dark:border-gray-800 justify-between px-4 py-4 gap-x-6 hover:border hover:shadow shadow-gray-200/70 dark:hover:shadow-gray-700/70 hover:rounded-md text-gray-700 dark:text-gray-300">
+                        <Link key={index} href={`/accounts/profile/${creator._id}`}>
+                        <a className="flex items-center border-b border-gray-200 dark:border-gray-800 justify-between px-4 py-4 gap-x-6 hover:border hover:shadow shadow-gray-200/70 dark:hover:shadow-gray-700/70 hover:rounded-md text-gray-700 dark:text-gray-300">
                            <span className="text-lg font-bold">{index + 1}</span>
                            <div className="flex items-center gap-x-3 flex-grow">
                               <div className="relative h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-100 overflow-hidden">
@@ -36,16 +26,18 @@ export default function TopCreator({data}){
                               <span className="truncate">{creator.profile?.username || sortAddress(creator._id)}</span>
                            </div>
                            <span className="font-semibold">{creator.totalItem} Item Created</span>
-                        </div>
+                        </a>
+                        </Link>
                      )
                   })
                }
             </div>
             <div className="w-full">
                {
-                  creator2.map((creator, index) => {
+                  creator2?.map((creator, index) => {
                      return(
-                        <div key={index + 1 + slicer} className="flex items-center border-b border-gray-200 dark:border-gray-800 justify-between px-4 py-4 gap-x-6 hover:border text-gray-700 dark:text-gray-300 hover:shadow-gray-200/70 dark:hover:shadow hover:shadow-gray-700/70 hover:rounded-md">
+                        <Link key={index + 1 + slicer} href={`/accounts/profile/${creator._id}`}>
+                        <a className="flex items-center border-b border-gray-200 dark:border-gray-800 justify-between px-4 py-4 gap-x-6 hover:border text-gray-700 dark:text-gray-300 hover:shadow-gray-200/70 dark:hover:shadow hover:shadow-gray-700/70 hover:rounded-md">
                            <span className="text-lg font-bold">{index + 1 + slicer}</span>
                            <div className="flex items-center gap-x-3 flex-grow">
                               <div className="relative h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-100 overflow-hidden">
@@ -54,7 +46,8 @@ export default function TopCreator({data}){
                               <span className="truncate">{creator.profile?.username || sortAddress(creator._id)}</span>
                            </div>
                            <span className="font-semibold">{creator.totalItem} Item Created</span>
-                        </div>
+                        </a>
+                        </Link>
                      )
                   })
                }

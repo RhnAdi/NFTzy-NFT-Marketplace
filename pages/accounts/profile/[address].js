@@ -170,7 +170,6 @@ export async function getServerSideProps (ctx) {
             ..._profile
          }
       }
-      console.log(data)
       return {
          props: {
             data

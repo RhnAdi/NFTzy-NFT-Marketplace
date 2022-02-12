@@ -67,7 +67,7 @@ export default function Create() {
          const added = await client.add(data);
          const url = `https://ipfs.infura.io/ipfs/${added.path}`;
 
-         await createSale(url);
+         await createSale(url, fileUri);
          setWaitingTx(false);
       } catch (error) {
          setWaitingTx(false);         
@@ -79,7 +79,7 @@ export default function Create() {
       setPrice(e.target.value);
    }
 
-   async function createSale(url) {
+   async function createSale(url, image_url) {
       try {
          // Connect to Wallet
          const web3modal = new web3Modal({
@@ -119,7 +119,10 @@ export default function Create() {
             seller: item.seller,
             owner: item.owner,
             price: Number(web3.utils.fromWei(item.price, 'ether')),
-            tx_hash: marketItem.transactionHash
+            tx_hash: marketItem.transactionHash,
+            name: name,
+            description: description,
+            image: image_url
          });
       } catch (error) {
          console.log(error)

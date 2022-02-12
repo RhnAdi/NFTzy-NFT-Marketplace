@@ -5,6 +5,7 @@ import ImageIcon from "@/icons/ImageIcon";
 import UtilityIcon from "@/icons/UtilityIcon";
 import WorldIcon from "@/icons/WorldIcon";
 import colors from "tailwindcss/colors";
+import Link from "next/link"
 
 export default function Categories(){
    const categories = [
@@ -54,7 +55,9 @@ export default function Categories(){
                            <span className="text-xl font-bold text-gray-800 dark:text-gray-200">{categori.title}</span>
                         </div>
                         <p className="text-lg text-gray-700 dark:text-gray-300">{categori.sub}</p>
-                        <p className="text-blue-700 text-lg">Explore &rarr;</p>
+                        <Link href="/market">
+                           <a className="text-blue-700 text-lg">Explore &rarr;</a>
+                        </Link>
                      </div>
                   )
                })

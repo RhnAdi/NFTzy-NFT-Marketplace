@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import SekeletonCard from "@/components/Card/SekeletonCard";
 import { SET_MARKETCONTRACT, SET_TOKENCONTRACT, SET_WEB3 } from "utils/redux/Type";
+import Head from "next/head"
 
 const Home = (props) => {
   const [nfts, setNfts] = useState([]);
@@ -73,6 +74,9 @@ const Home = (props) => {
   
   return(
     <div className={`bg-gray-100 dark:bg-gray-900`}>
+      <Head>
+        <title>NFTzy - Dashboard</title>
+      </Head>
       <Sidebar active="Dashboard" />
       <Navbar />
       <Container>
